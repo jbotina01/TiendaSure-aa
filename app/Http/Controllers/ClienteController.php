@@ -1,0 +1,66 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Cliente;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class ClienteController extends Controller
+{
+    public function index(): View
+    {
+        $clientes = Cliente::latest()->get();
+
+        return view('clientes.index', compact('clientes'));
+    }
+//funcion para acceder a la vista
+        public function create(): View
+    {
+        return view('clientes.create');
+    }
+
+    //funcion para guardar datos del formulario
+        public function store(Request $request): RedirectResponse
+    {
+        $datos = $request->validate([
+            'nombre' => ['required', 'string', 'max:100'],
+            'correo' => ['required', 'email', 'max:150', 'unique:clientes,correo'],
+            'telefono' => ['required', 'string', 'max:20'],
+            'ciudad' => ['required', 'string', 'max:80'],
+            'mensaje' => ['required', 'string', 'max:1000'],
+        ]);
+
+        Cliente::create($datos);
+
+        return redirect()
+            ->route('clientes.index')
+            ->with('exito', 'Cliente registrado correctamente.');
+    }
+
+    //edit y update 
+    public function edit(Cliente $cliente)
+{
+    return view('clientes.edit', compact('cliente'));
+}
+
+public function update(Request $request, Cliente $cliente)
+{
+    $datos = $request->validate([
+        'nombre' => ['required', 'string', 'max:100'],
+        'correo' => ['required', 'email', 'max:150'],
+        'telefono' => ['required', 'string', 'max:20'],
+        'ciudad' => ['required', 'string', 'max:100'],
+        'mensaje' => ['nullable', 'string', 'max:500'],
+    ]);
+
+    $cliente->update($datos);
+
+    return redirect()
+        ->route('clientes.index')
+        ->with('success', 'Cliente actualizado correctamente.');
+}
+
+
+}
